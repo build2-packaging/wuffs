@@ -1,0 +1,29 @@
+# Upstream test/c/std programs. Each #include's the amalgamation and
+# testlib.c (they do not link lib{wuffs}). Mimic tests stay off: they
+# need giflib, libpng, zlib, etc.
+
+posix = ($c.target.class != 'windows')
+
+for n: adler32 bmp bzip2 cbor crc32 deflate gif gzip json lzw nie png tga \
+       wbmp zlib
+{
+  ./: exe{$n}: include = $posix
+  ./: exe{$n}: c{$n} testscript
+  exe{$n}: ../testlib/c{testlib}: include = adhoc
+}
+
+# Each translation unit pulls in the ~1.7M amalgamation.
+#
+obje{*}: cc.serialize = true
+
+# testlib.c's 64MiB uninitialized globals land in __DATA,__common under
+# Apple clang's -fcommon default. Darwin ld then warns that 0x8000
+# alignment exceeds the 0x4000 segment maximum. -fno-common puts them
+# in BSS instead. Local to these TUs (they #include testlib.c).
+#
+if ($c.target.class == 'macos')
+  obje{*}: c.coptions += -fno-common
+
+exe{*}: dist = false
+c{*}: dist = false
+testscript{*}: dist = false

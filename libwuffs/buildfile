@@ -1,4 +1,4 @@
-./: {*/ -build/} doc{README.md PACKAGE-README.md CHANGELOG.md} legal{LICENSE AUTHORS} manifest
+./: {*/ -build/ -release/} doc{README.md PACKAGE-README.md CHANGELOG.md} legal{LICENSE AUTHORS} manifest
 
 # Don't install tests.
 #
