@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include <errno.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include <wuffs/wuffs.h>
@@ -7,67 +7,56 @@
 #undef NDEBUG
 #include <assert.h>
 
-#ifdef _WIN32
-#define tmpfile mytmpfile
-static FILE *mytmpfile ();
+#ifndef DST_BUFFER_ARRAY_SIZE
+#define DST_BUFFER_ARRAY_SIZE 1024
 #endif
 
-int main ()
+static uint8_t g_dst_buffer_array[DST_BUFFER_ARRAY_SIZE];
+
+/* gzip-encoded "Hello Wuffs.\n" produced by:
+ *
+ *   echo "Hello Wuffs." | gzip --no-name
+ */
+static uint8_t g_src_array[] = {
+    0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0xf3,
+    0x48, 0xcd, 0xc9, 0xc9, 0x57, 0x08, 0x2f, 0x4d, 0x4b, 0x2b, 0xd6,
+    0xe3, 0x02, 0x00, 0x3c, 0x84, 0x75, 0xbb, 0x0d, 0x00, 0x00, 0x00,
+};
+
+#define WORK_BUFFER_ARRAY_SIZE \
+  WUFFS_GZIP__DECODER_WORKBUF_LEN_MAX_INCL_WORST_CASE
+
+#if WORK_BUFFER_ARRAY_SIZE > 0
+static uint8_t g_work_buffer_array[WORK_BUFFER_ARRAY_SIZE];
+#else
+static uint8_t g_work_buffer_array[1];
+#endif
+
+int
+main (void)
 {
-  char b[256];
+  static const char want[] = "Hello Wuffs.\n";
 
-  /* Basics.
-   */
-  {
-    FILE *o = tmpfile ();
-    assert (say_hello (o, "World") > 0);
-    rewind (o);
-    assert (fread (b, 1, sizeof (b), o) == 14 &&
-            strncmp (b, "Hello, World!\n", 14) == 0);
-    fclose (o);
-  }
+  wuffs_gzip__decoder* dec = wuffs_gzip__decoder__alloc ();
+  assert (dec != NULL);
 
-  /* Empty name.
-   */
-  {
-    FILE *o = tmpfile ();
-    assert (say_hello (o, "") < 0 && errno == EINVAL);
-    fclose (o);
-  }
+  wuffs_base__io_buffer dst = wuffs_base__ptr_u8__writer (
+      &g_dst_buffer_array[0], DST_BUFFER_ARRAY_SIZE);
+
+  wuffs_base__io_buffer src = wuffs_base__ptr_u8__reader (
+      &g_src_array[0], sizeof (g_src_array), true);
+
+  wuffs_base__status status = wuffs_gzip__decoder__transform_io (
+      dec,
+      &dst,
+      &src,
+      wuffs_base__make_slice_u8 (&g_work_buffer_array[0],
+                                 WORK_BUFFER_ARRAY_SIZE));
+  free (dec);
+
+  assert (wuffs_base__status__is_ok (&status));
+  assert (dst.meta.wi == (sizeof (want) - 1));
+  assert (memcmp (dst.data.ptr, want, sizeof (want) - 1) == 0);
 
   return 0;
 }
-
-#ifdef _WIN32
-#include <windows.h>
-#include <fcntl.h>
-#include <io.h>
-
-FILE *mytmpfile ()
-{
-  char d[MAX_PATH + 1], p[MAX_PATH + 1];
-  if (GetTempPathA (sizeof (d), d) == 0 ||
-      GetTempFileNameA (d, "tmp", 0, p) == 0)
-    return NULL;
-
-  HANDLE h = CreateFileA (p,
-                          GENERIC_READ | GENERIC_WRITE,
-                          0,
-                          NULL,
-                          CREATE_ALWAYS,
-                          FILE_ATTRIBUTE_TEMPORARY | FILE_FLAG_DELETE_ON_CLOSE,
-                          NULL);
-  if (h == INVALID_HANDLE_VALUE)
-    return NULL;
-
-  int fd = _open_osfhandle ((intptr_t) h, _O_RDWR);
-  if (fd == -1)
-    return NULL;
-
-  FILE *f = _fdopen (fd, "wb+");
-  if (f == NULL)
-    _close (fd);
-
-  return f;
-}
-#endif

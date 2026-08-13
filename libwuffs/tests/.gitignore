@@ -1,6 +1,22 @@
 # Test executables.
 #
 driver
+aux
+adler32
+bmp
+bzip2
+cbor
+crc32
+deflate
+gif
+gzip
+json
+lzw
+nie
+png
+tga
+wbmp
+zlib
 
 # Testscript output directories (can be symlinks).
 #

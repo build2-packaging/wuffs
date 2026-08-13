@@ -1,7 +1,11 @@
 using c
 
+cxx.std = latest
+using cxx
+
 h{*}: extension = h
 c{*}: extension = c
+cxx{*}: extension = cc
 
 # Every exe{} in this subproject is by default a test.
 #
