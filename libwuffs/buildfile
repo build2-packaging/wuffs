@@ -1,5 +1,16 @@
-./: {*/ -build/ -release/} doc{README.md PACKAGE-README.md CHANGELOG.md} legal{LICENSE AUTHORS} manifest
+./: {*/ -build/ -release/ -doc/}                  \
+    doc{README.md PACKAGE-README.md CHANGELOG.md} \
+    doc/doc{**}                                   \
+    legal{LICENSE AUTHORS} manifest
 
 # Don't install tests.
 #
 tests/: install = false
+
+# Recreate the upstream doc/ layout under the package doc directory.
+#
+doc/doc{*}:
+{
+  install         = doc/doc/
+  install.subdirs = true
+}

@@ -1,0 +1,3 @@
+# Directory symlink (needed to check the package out on Windows).
+#
+doc symlink=dir
