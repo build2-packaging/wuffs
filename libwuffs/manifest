@@ -2,15 +2,19 @@
 name: libwuffs
 version: 0.3.5-a.0.z
 language: c
-project: build2-wuffs
-summary: wuffs C library
-license: other: proprietary ; Not free/open source.
+language: c++
+project: wuffs
+summary: Memory-safe C library for parsing untrusted file formats
+license: Apache-2.0
 description-file: README.md
 package-description-file: PACKAGE-README.md
 changes-file: CHANGELOG.md
-url: https://example.org/upstream
-email: upstream@example.org
-package-url: https://github.com/build2-packaging/build2-wuffs
+url: https://github.com/google/wuffs
+email: wuffs@googlegroups.com
+package-url: https://github.com/build2-packaging/wuffs
 package-email: packaging@build2.org ; Mailing list.
+topics: image decoder, compression, parsing, memory safety
+doc-url: https://github.com/google/wuffs/blob/v0.3.5/doc/wuffs-the-library.md
+src-url: https://github.com/google/wuffs
 depends: * build2 >= 0.18.0
 depends: * bpkg >= 0.18.0
