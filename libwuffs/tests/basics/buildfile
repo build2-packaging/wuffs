@@ -1,0 +1,3 @@
+import libs = libwuffs%lib{wuffs}
+
+exe{driver}: {h c}{**} $libs testscript{**}
