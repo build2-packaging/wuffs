@@ -2,10 +2,19 @@
 #
 #c.internal.scope = current
 
+# Compile the amalgamation as C (default) or as C++ so wuffs_aux is
+# included (config.libwuffs.cpp=true).
+#
+config [bool] config.libwuffs.cpp ?= false
+
 using c
+
+cxx.std = latest
+using cxx
 
 h{*}: extension = h
 c{*}: extension = c
+cxx{*}: extension = cc
 
 # The test target for cross-testing (running tests under Wine, etc).
 #

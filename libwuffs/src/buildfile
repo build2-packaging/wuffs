@@ -1,7 +1,3 @@
-intf_libs = # Interface dependencies.
-impl_libs = # Implementation dependencies.
-#import xxxx_libs += libhello%lib{hello}
-
 # Public headers.
 #
 pub = [dir_path] ../include/wuffs/
@@ -12,32 +8,42 @@ pub_hdrs = $($pub/ pub_hdrs)
 
 lib{wuffs}: libul{wuffs}: $pub/{$pub_hdrs}
 
-# Private headers and sources as well as dependencies.
+# Same amalgamation: C by default (wuffs.c), C++ via wuffs.cc when
+# config.libwuffs.cpp=true (upstream: compile the .c file as C++).
 #
-libul{wuffs}: {h c}{**} $impl_libs $intf_libs
+libul{wuffs}: c{wuffs}:   include = (!$config.libwuffs.cpp)
+libul{wuffs}: cxx{wuffs}: include = ( $config.libwuffs.cpp)
 
-libs{wuffs}: def{wuffs}: include = ($c.target.system == 'win32-msvc')
+libs{wuffs}: def{wuffs}: include = ($cc.target.system == 'win32-msvc')
 def{wuffs}: libul{wuffs}
 
-# Build options.
+# Build options (cc.* applies to both c and cxx).
 #
-out_pfx_inc = [dir_path] $out_root/include/
 src_pfx_inc = [dir_path] $src_root/include/
-out_pfx_src = [dir_path] $out_root/src/
-src_pfx_src = [dir_path] $src_root/src/
 
-c.poptions =+ "-I$out_pfx_src" "-I$src_pfx_src" \
-              "-I$out_pfx_inc" "-I$src_pfx_inc"
+cc.poptions =+ "-I$src_pfx_inc"
 
-if ($c.target.system == 'mingw32')
-  c.loptions += -Wl,--export-all-symbols
+# Compile the amalgamation as an implementation translation unit. Do not
+# export this macro: consumers include the header without it and link
+# lib{wuffs}.
+#
+{obja objs}{wuffs}: cc.poptions += -DWUFFS_IMPLEMENTATION
+
+# The amalgamation is large.
+#
+{obja objs}{wuffs}: cc.serialize = true
+
+if ($cc.target.system == 'mingw32')
+  cc.loptions += -Wl,--export-all-symbols
 
 # Export options.
 #
 lib{wuffs}:
 {
-  c.export.poptions = "-I$out_pfx_inc" "-I$src_pfx_inc"
-  c.export.libs = $intf_libs
+  cc.export.poptions = "-I$src_pfx_inc"
+
+  export.metadata = 1 libwuffs
+  libwuffs.cpp = [bool] $config.libwuffs.cpp
 }
 
 # For pre-releases use the complete version to make sure they cannot
