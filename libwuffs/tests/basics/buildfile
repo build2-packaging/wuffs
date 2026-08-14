@@ -9,6 +9,7 @@ have_cpp = $($libs: libwuffs.cpp)
 exe{driver}: {h c}{**} $libs
 
 # C++ smoke (config.libwuffs.cpp=true), covers wuffs_aux.
+# Named aux-driver, not aux: AUX is a reserved Windows device name.
 #
-./: exe{aux}: include = $have_cpp
-exe{aux}: cxx{aux} $libs
+./: exe{aux-driver}: include = $have_cpp
+exe{aux-driver}: cxx{aux-driver} $libs
