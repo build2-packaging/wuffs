@@ -27,11 +27,7 @@ cc.poptions =+ "-I$src_pfx_inc"
 # export this macro: consumers include the header without it and link
 # lib{wuffs}.
 #
-{obja objs}{wuffs}: cc.poptions += -DWUFFS_IMPLEMENTATION
-
-# The amalgamation is large.
-#
-{obja objs}{wuffs}: cc.serialize = true
+obj{wuffs}: cc.poptions += -DWUFFS_IMPLEMENTATION
 
 if ($cc.target.system == 'mingw32')
   cc.loptions += -Wl,--export-all-symbols
