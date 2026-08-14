@@ -1,0 +1,8 @@
+: 1
+name: libwuffs
+version: 0.3.5+1
+language: c
+language: c++
+project: wuffs
+summary: Memory-safe C library for parsing untrusted file formats
+license: Apache-2.0
