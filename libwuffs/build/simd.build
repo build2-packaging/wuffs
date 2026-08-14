@@ -1,0 +1,15 @@
+# Wuffs x86 SIMD is compiled in automatically on GCC/Clang (per-function
+# target attributes). cl.exe needs /arch:AVX so __AVX__ is set. Skip if
+# the user already passed /arch: (or -arch:).
+#
+if ($c.id == 'msvc' && \
+    ($c.target.cpu == 'x86_64' || $c.target.cpu == 'i686'))
+{
+  if (!$regex.find_search($cc.coptions $c.coptions $cxx.coptions, '[-\/]arch:'))
+  {
+    if ($build.meta_operation == 'configure')
+      text "append /arch:AVX \(SIMD auto-detected\)"
+
+    cc.coptions += /arch:AVX
+  }
+}
