@@ -1,7 +1,5 @@
 : run
 :
-# Upstream tests chdir up until they see wuffs-root-directory.txt,
-# then read test/data/ relative to that directory. Start in the
-# git submodule, which is not part of the published archive.
+# testlib walks up to wuffs-root-directory.txt and reads test/data/.
 #
-env -c $src_root/../../upstream -- $* >!
+$* >!

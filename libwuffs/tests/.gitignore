@@ -18,7 +18,13 @@ tga
 wbmp
 zlib
 
-# Testscript output directories (can be symlinks).
+# Testscript working directories next to the test executables.
+# Do not ignore tests/test/ (source-side data overlay).
 #
-test
 test-*
+c/**/test
+basics/test
+
+# Generated testlib root marker.
+#
+wuffs-root-directory.txt

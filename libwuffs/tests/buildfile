@@ -1,9 +1,6 @@
-./: {*/ -build/ -c/}
+./: {*/ -build/ -c/ -test/}
 
-# Upstream test/c/std programs need the git submodule's test/data.
-# Keep them for local testing. The published archive (and the
-# post-checkout redist) omit that directory, so only mention it
-# when it is present and we are not distributing.
+# Extra POSIX tests. Not in dist. Not on MSVC.
 #
-if ($build.meta_operation != 'dist' && $directory_exists($src_base/c))
-  ./: c/
+./: c/: include = ($cxx.target.system != 'win32-msvc')
+c/: dist = false

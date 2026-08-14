@@ -2,19 +2,40 @@
 # testlib.c (they do not link lib{wuffs}). Mimic tests stay off: they
 # need giflib, libpng, zlib, etc.
 
-posix = ($c.target.class != 'windows')
-
-for n: adler32 bmp bzip2 cbor crc32 deflate gif gzip json lzw nie png tga \
-       wbmp zlib
-{
-  ./: exe{$n}: include = $posix
-  ./: exe{$n}: c{$n} testscript
-  exe{$n}: ../testlib/c{testlib}: include = adhoc
-}
-
-# Each translation unit pulls in the ~1.7M amalgamation.
+# testlib.c uses unistd.h and sys/time.h. MinGW has those. MSVC does not.
 #
-obje{*}: cc.serialize = true
+msvc = ($cxx.target.system == 'win32-msvc')
+
+# testlib walks up to this marker, then reads test/data/. tests/test/
+# is a real directory (test/data/* are per-entry upstream symlinks),
+# so ln -s of it gets a directory symlink on Windows (build2#549).
+#
+file{$out_root/wuffs-root-directory.txt}:
+{{
+  touch $path($>)
+}}
+
+$out_root/fsdir{test}:
+% update
+{{
+  diag ln $>
+  rm -f $out_root/test
+  ln -s $posix_string([dir_path] $src_root/test) $out_root/test
+}}
+% clean
+{{
+  rm -f $out_root/test
+}}
+
+for t: c{*}
+{
+  n = $name($t)
+  ./: exe{$n}: include = (!$msvc)
+  exe{$n}: $t testscript
+  exe{$n}: ../testlib/c{testlib}: include = adhoc
+  exe{$n}: file{$out_root/wuffs-root-directory.txt}: include = adhoc
+  exe{$n}: $out_root/fsdir{test}: include = adhoc
+}
 
 # testlib.c's 64MiB uninitialized globals land in __DATA,__common under
 # Apple clang's -fcommon default. Darwin ld then warns that 0x8000

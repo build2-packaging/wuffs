@@ -1,3 +1,9 @@
 # Directory symlink (needed to check the package out on Windows).
 #
 doc symlink=dir
+tests/test/data/analysis symlink=dir
+tests/test/data/artificial-bzip2 symlink=dir
+tests/test/data/artificial-deflate symlink=dir
+tests/test/data/artificial-gif symlink=dir
+tests/test/data/artificial-png symlink=dir
+tests/test/data/non-ascii symlink=dir
