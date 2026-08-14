@@ -45,6 +45,13 @@ for t: c{*}
 if ($c.target.class == 'macos')
   obje{*}: c.coptions += -fno-common
 
+# wuffs_bzip2__decoder is ~4MiB (uint32_t f_bwt[1048576]) and the
+# upstream tests stack-allocate it. Windows PE default stack is 1MiB.
+# These tests are not built for MSVC (win32-msvc).
+#
+if ($c.target.system == 'mingw32')
+  exe{*}: cc.loptions += -Wl,--stack,8388608
+
 exe{*}: dist = false
 c{*}: dist = false
 testscript{*}: dist = false
