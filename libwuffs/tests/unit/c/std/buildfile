@@ -6,9 +6,14 @@
 #
 msvc = ($cxx.target.system == 'win32-msvc')
 
-# Source-tree test data. Listed on every std test exe so dist and
-# update-for-test see the files. The testscript links tests/test/ into
-# $~ (a real directory of per-entry upstream symlinks, build2#549).
+# Runtime data is opened as "test/data/...". The testscript links
+# tests/test/ into $~. Keep the files on the exe so dist and
+# update-for-test see them. tests/test/ is a real directory of
+# per-entry upstream symlinks (build2#549).
+#
+# Tests #include ../../../release/c/wuffs-unsupported-snapshot.c
+# (they do not link lib{wuffs}). unit/ makes that path resolve to
+# tests/release/c/.
 #
 for t: c{*}
 {
@@ -16,7 +21,8 @@ for t: c{*}
   ./: exe{$n}: include = (!$msvc)
   exe{$n}: $t testscript
   exe{$n}: ../testlib/c{testlib}: include = adhoc
-  exe{$n}: ../../test/data/file{**}: include = adhoc
+  exe{$n}: ../../../test/data/file{**}: include = adhoc
+  exe{$n}: ../../../release/c/c{wuffs-unsupported-snapshot.c}: include = adhoc
 }
 
 # testlib.c's 64MiB uninitialized globals land in __DATA,__common under
@@ -33,7 +39,3 @@ if ($c.target.class == 'macos')
 #
 if ($c.target.system == 'mingw32')
   exe{*}: cc.loptions += -Wl,--stack,8388608
-
-exe{*}: dist = false
-c{*}: dist = false
-testscript{*}: dist = false

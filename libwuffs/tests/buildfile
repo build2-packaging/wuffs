@@ -1,6 +1,7 @@
-./: {*/ -build/ -c/ -test/}
+./: {*/ -build/ -unit/ -test/ -release/}
 
-# Extra POSIX tests. Not in dist. Not on MSVC.
+# Extra POSIX tests. Not on MSVC (unistd.h). Nested under unit/ so
+# ../../../release/c/ from std/ stays inside this subproject.
+# Keep them on ./: so dist ships the sources.
 #
-./: c/: include = ($cxx.target.system != 'win32-msvc')
-c/: dist = false
+./: unit/c/: include = ($cxx.target.system != 'win32-msvc')

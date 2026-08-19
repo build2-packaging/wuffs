@@ -1,4 +1,4 @@
-./: {*/ -build/ -release/ -doc/}                  \
+./: {*/ -build/ -doc/}                            \
     doc{README.md PACKAGE-README.md CHANGELOG.md} \
     doc/doc{**}                                   \
     legal{LICENSE AUTHORS} manifest

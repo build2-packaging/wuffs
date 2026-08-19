@@ -22,5 +22,5 @@ zlib
 # Do not ignore tests/test/ (source-side data overlay).
 #
 test-*
-c/**/test
+unit/**/test
 basics/test

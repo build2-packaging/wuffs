@@ -1,1 +1,0 @@
-../../../../upstream/test/c/std/bmp.c
