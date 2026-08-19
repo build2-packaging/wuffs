@@ -24,7 +24,3 @@ zlib
 test-*
 c/**/test
 basics/test
-
-# Generated testlib root marker.
-#
-wuffs-root-directory.txt

@@ -6,35 +6,17 @@
 #
 msvc = ($cxx.target.system == 'win32-msvc')
 
-# testlib walks up to this marker, then reads test/data/. tests/test/
-# is a real directory (test/data/* are per-entry upstream symlinks),
-# so ln -s of it gets a directory symlink on Windows (build2#549).
+# Source-tree test data. Listed on every std test exe so dist and
+# update-for-test see the files. The testscript links tests/test/ into
+# $~ (a real directory of per-entry upstream symlinks, build2#549).
 #
-file{$out_root/wuffs-root-directory.txt}:
-{{
-  touch $path($>)
-}}
-
-$out_root/fsdir{test}:
-% update
-{{
-  diag ln $>
-  rm -f $out_root/test
-  ln -s $posix_string([dir_path] $src_root/test) $out_root/test
-}}
-% clean
-{{
-  rm -f $out_root/test
-}}
-
 for t: c{*}
 {
   n = $name($t)
   ./: exe{$n}: include = (!$msvc)
   exe{$n}: $t testscript
   exe{$n}: ../testlib/c{testlib}: include = adhoc
-  exe{$n}: file{$out_root/wuffs-root-directory.txt}: include = adhoc
-  exe{$n}: $out_root/fsdir{test}: include = adhoc
+  exe{$n}: ../../test/data/file{**}: include = adhoc
 }
 
 # testlib.c's 64MiB uninitialized globals land in __DATA,__common under
